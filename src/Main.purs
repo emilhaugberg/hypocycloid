@@ -33,7 +33,7 @@ lines  = map ptl points
     ptl p = { start: p, end: p + Math.pi }
 
 linePositions :: Line -> LineCoords
-linePositions lo = Tuple end start
+linePositions lo = Tuple start end
   where
     end           = Tuple (xCoord lo.end)   (yCoord lo.end)
     start         = Tuple (xCoord lo.start) (yCoord lo.start)
