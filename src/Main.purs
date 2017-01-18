@@ -5,13 +5,14 @@ import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Ref
 import Control.Monad.Eff.Timer
+import Data.Identity
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Graphics.Canvas
 import Math as Math
 
 type Line       = { start :: Number, end :: Number }
-type Dot        = Tuple Number Number
+type Angle      = Number
 type Position   = Tuple Number Number
 type Radian     = Number
 type LineCoords = Tuple Position Position
@@ -64,40 +65,35 @@ drawLine lo ctx = do
   lineTo ctx (fst end)   (snd end)
   stroke ctx
 
-drawDot :: forall e. Dot -> Context2D -> Eff (canvas :: CANVAS | e) Context2D
-drawDot dot ctx = do
-  let dot' = calculateDotPos dot
-  let a = { x: fst dot', y: snd dot', r: dotRadius, start: 0.0, end: Math.pi * 2.0 }
+drawDot :: forall e. Angle -> Context2D -> Eff (canvas :: CANVAS | e) Context2D
+drawDot ang ctx = do
+  let dot = calculateDotPos ang
+  let a = { x: fst dot, y: snd dot, r: dotRadius, start: 0.0, end: Math.pi * 2.0 }
   beginPath ctx
   arc ctx a
-  setFillStyle "white" ctx
+  setFillStyle "black" ctx
   fill ctx
 
-calculateDotPos :: Dot -> Position
-calculateDotPos dot =
+calculateDotPos :: Angle -> Position
+calculateDotPos ang =
   Tuple
-  ((Math.cos (fst dot)) * radius + 300.0)
-  ((Math.sin (snd dot)) * radius + 300.0)
+  ((Math.cos ang) * radius + 300.0)
+  ((Math.sin ang) * radius + 300.0)
 
-moveDot :: Dot -> Dot
-moveDot d = Tuple (move fst) (move snd)
-  where
-    move f = f d + (Math.pi / 16.0)
+move :: Angle -> Angle
+move ang = ang + (Math.pi / 16.0)
 
-moveAndDrawDot :: forall r. Ref Dot -> Context2D -> Eff (ref :: REF, canvas :: CANVAS | r) Unit
-moveAndDrawDot dot ctx = do
-  modifyRef dot moveDot
-  dot' <- readRef dot
-  void $ drawDot dot' ctx
-
-draw :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS | e) Unit
-draw = do
+main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER | e) Unit
+main = void $ do
   Just canvas <- getCanvasElementById "canvas"
   ctx         <- getContext2D canvas
-  dot         <- newRef $ Tuple (Math.pi / 2.0) 0.0
-  drawCircle ctx
-  drawLines lines ctx
-  void $ moveAndDrawDot dot ctx
 
-main :: forall e. (Partial) => Eff (timer :: TIMER, ref :: REF, canvas :: CANVAS | e) IntervalId
-main = setInterval 100 draw
+  exampleDot  <- newRef $ (Math.pi / 2.0)
+
+  setInterval 100 $ void $ do
+    clearRect ctx {x: 0.0, y: 0.0, w: width, h: height}
+    drawCircle ctx
+    drawLines lines ctx
+    modifyRef exampleDot move
+    dot <- readRef exampleDot
+    drawDot dot ctx
