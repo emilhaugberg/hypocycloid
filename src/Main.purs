@@ -76,8 +76,10 @@ drawDot (Angle ang) ctx = do
 calculateDotPos :: Angle -> Position
 calculateDotPos (Angle ang) =
   Tuple
-  ((Math.cos (ang)) * 0.0 + 300.0)
-  ((Math.sin (ang)) * radius + 300.0)
+  (calculatePosition Math.cos 0.0)
+  (calculatePosition Math.sin radius)
+  where
+    calculatePosition f r = (f ang) * r + 300.0
 
 move :: Angle -> Angle
 move (Angle ang) = Angle (ang + (Math.pi / 16.0))
@@ -86,13 +88,12 @@ main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER
 main = void $ do
   Just canvas <- getCanvasElementById "canvas"
   ctx         <- getContext2D canvas
-
   exampleDot  <- newRef $ Angle Math.pi
 
   setInterval 100 $ void $ do
     clearRect ctx {x: 0.0, y: 0.0, w: width, h: height}
-    drawCircle ctx
-    drawLines lines ctx
     modifyRef exampleDot move
     dot <- readRef exampleDot
+    drawCircle ctx
+    drawLines lines ctx
     drawDot dot ctx
