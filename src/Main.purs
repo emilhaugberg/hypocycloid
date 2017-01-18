@@ -12,10 +12,11 @@ import Graphics.Canvas
 import Math as Math
 
 type Line       = { start :: Number, end :: Number }
-type Angle      = Number
 type Position   = Tuple Number Number
 type Radian     = Number
 type LineCoords = Tuple Position Position
+
+newtype Angle   = Angle Number
 
 width  = 600.0
 height = 600.0
@@ -66,29 +67,29 @@ drawLine lo ctx = do
   stroke ctx
 
 drawDot :: forall e. Angle -> Context2D -> Eff (canvas :: CANVAS | e) Context2D
-drawDot ang ctx = do
-  let dot = calculateDotPos ang
+drawDot (Angle ang) ctx = do
+  let dot = calculateDotPos (Angle ang)
   let a = { x: fst dot, y: snd dot, r: dotRadius, start: 0.0, end: Math.pi * 2.0 }
   beginPath ctx
   arc ctx a
-  setFillStyle "black" ctx
+  setFillStyle "white" ctx
   fill ctx
 
 calculateDotPos :: Angle -> Position
-calculateDotPos ang =
+calculateDotPos (Angle ang) =
   Tuple
-  ((Math.cos ang) * radius + 300.0)
-  ((Math.sin ang) * radius + 300.0)
+  ((Math.cos (ang)) * 0.0 + 300.0)
+  ((Math.sin (ang)) * radius + 300.0)
 
 move :: Angle -> Angle
-move ang = ang + (Math.pi / 16.0)
+move (Angle ang) = Angle (ang + (Math.pi / 16.0))
 
 main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER | e) Unit
 main = void $ do
   Just canvas <- getCanvasElementById "canvas"
   ctx         <- getContext2D canvas
 
-  exampleDot  <- newRef $ (Math.pi / 2.0)
+  exampleDot  <- newRef $ Angle Math.pi
 
   setInterval 100 $ void $ do
     clearRect ctx {x: 0.0, y: 0.0, w: width, h: height}
