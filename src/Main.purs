@@ -11,7 +11,6 @@ import Math as Math
 
 type Line       = { start :: Number, end :: Number }
 type Position   = Tuple Number Number
-type Radian     = Number
 type LineCoords = Tuple Position Position
 
 newtype Angle   = Angle Number
