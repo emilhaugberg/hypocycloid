@@ -1,14 +1,12 @@
 module Main where
 
-import Prelude
+import Prelude (Unit, bind, map, void, ($), (*), (+), (/))
 import Control.Monad.Eff (Eff, foreachE)
-import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Ref
-import Control.Monad.Eff.Timer
-import Data.Identity
+import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef)
+import Control.Monad.Eff.Timer (TIMER, setInterval)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst, snd)
-import Graphics.Canvas
+import Graphics.Canvas (CANVAS, Context2D, arc, beginPath, clearRect, fill, getCanvasElementById, getContext2D, lineTo, moveTo, setFillStyle, stroke)
 import Math as Math
 
 type Line       = { start :: Number, end :: Number }
