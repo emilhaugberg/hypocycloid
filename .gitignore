@@ -1,4 +1,5 @@
-app/bundle.js
+.psci_modules/
+public/bundle.js
 output/
 bower_components/
 node_modules/

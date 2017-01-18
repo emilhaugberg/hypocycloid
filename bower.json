@@ -12,7 +12,11 @@
     "purescript-canvas": "^2.0.0",
     "purescript-math": "^2.0.0",
     "purescript-maybe": "^2.0.1",
-    "purescript-tuples": "^3.1.0"
+    "purescript-tuples": "^3.1.0",
+    "purescript-refs": "^2.0.0",
+    "purescript-js-timers": "^2.0.0",
+    "purescript-st": "^2.0.0",
+    "purescript-transformers": "^2.1.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^2.0.0"
