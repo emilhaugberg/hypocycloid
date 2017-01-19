@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (Unit, bind, map, void, ($), (*), (+), (/))
+import Prelude (Unit, bind, map, void, ($), (*), (/), (+), (-))
 import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef)
 import Control.Monad.Eff.Timer (TIMER, setInterval)
@@ -75,18 +75,24 @@ drawDot (Angle ang) ctx = do
 calculateDotPos :: Angle -> Position
 calculateDotPos (Angle ang) =
   Tuple
-  (calculatePosition Math.cos 0.0)
-  (calculatePosition Math.sin radius)
+  (calculatePosition Math.cos radius)
+  (calculatePosition Math.sin 0.0)
   where
     calculatePosition f r = (f ang) * r + 300.0
+
+square :: Number -> Number
+square a = a * a
+
+calculateEllips :: Number -> Number -> Number -> Number
+calculateEllips x y a =
+    (square ((x * Math.cos a) - (y * Math.sin a) / radius))
+  + (square ((x * Math.sin a) + (y * Math.cos a) / 0.0001))
 
 move :: Angle -> Angle
 move (Angle ang) = Angle (ang + (Math.pi / 10.0))
 
-toAngle :: Number -> Angle
-toAngle num = Angle num
-
-startingAngles = map toAngle [Math.pi / 2.0, Math.pi, Math.pi / 4.0, Math.pi / 5.0]
+startingAngles :: Array Angle
+startingAngles = map Angle [Math.pi / 2.0, Math.pi, Math.pi / 4.0, Math.pi / 5.0]
 
 main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER | e) Unit
 main = void $ do
