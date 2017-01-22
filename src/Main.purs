@@ -41,14 +41,19 @@ dotRadius = 10.0
 centerX = width  / 2.0
 centerY = height / 2.0
 
+nums = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+
+startingAngles = map (\_ -> Angle $ Math.pi / 10.0) nums
+-- startingAngles = [Math.pi, Mat.pi /]
+
 space :: Angle
 space = Angle (Math.pi / 2.0 / 4.0)
 
-angles :: Array Angle
-angles = map ((*) space <<< Angle) [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+ellipsAngles :: Array Angle
+ellipsAngles = map ((*) space <<< Angle) nums
 
 ellipses :: Array Ellipse
-ellipses = map e angles
+ellipses = map e ellipsAngles
   where
     e angle =
       { x         : centerX
@@ -88,23 +93,35 @@ fromAngle (Angle x) = x
 move :: Angle -> Angle
 move (Angle ang) = Angle (ang + (Math.pi / 10.0))
 
-pointPos :: Angle -> Position
-pointPos ang = Tuple (x ang) (y ang)
+rotate :: Angle -> Position -> Position
+rotate ang pos = Tuple nx ny
   where
-    y ang     = centerX + (radius * (Math.sin ((Math.pi / 2.0) + ang')))
-    x ang     = centerY + (0.0    * (Math.cos ((Math.pi / 2.0) + ang')))
+    nx   = (cos * (fst pos - centerX)) + (sin * (snd pos - centerY)) + centerX
+    ny   = (cos * (snd pos - centerY)) - (sin * (fst pos - centerX)) + centerY
+    cos  = Math.cos ang'
+    sin  = Math.sin ang'
+    ang' = fromAngle ang
+
+pointPos :: Angle -> Angle -> Position
+pointPos ang angleR = rotate angleR $ Tuple (x ang) (y ang)
+  where
+    y ang     = centerX + (radius * (Math.sin $ ang'))
+    x ang     = centerY + (0.0    * (Math.cos $ ang'))
     ang' = fromAngle ang
 
 main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER | e) Unit
 main = void $ do
   Just canvas <- getCanvasElementById "canvas"
   ctx         <- getContext2D canvas
-  angles'     <- newRef $ angles
+  angles'     <- newRef $ startingAngles
 
-  setInterval 100 $ void $ do
+  setInterval 150 $ void $ do
     clearRect ctx {x: 0.0, y: 0.0, w: width, h: height}
     modifyRef angles' (map move)
+
     angles'' <- readRef angles'
+
     drawCircle ctx
     foreachE ellipses \ellipse -> void $ drawEllipse ellipse ctx
-    foreachE angles'' \angle   -> void $ drawPoint (pointPos angle) ctx
+    foreachE angles'' \angle   -> do
+      foreachE ellipsAngles  \eAng -> void $ drawPoint (pointPos angle eAng) ctx
