@@ -9,6 +9,7 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Semiring (class Semiring)
 import Data.Show (class Show)
+import Data.Array (zip)
 import Graphics.Canvas (CANVAS, Context2D, arc, beginPath, clearRect, fill, getCanvasElementById, getContext2D, lineTo, moveTo, setFillStyle, stroke)
 import Math as Math
 
@@ -113,7 +114,7 @@ main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER
 main = void $ do
   Just canvas <- getCanvasElementById "canvas"
   ctx         <- getContext2D canvas
-  angles'     <- newRef $ startingAngles
+  angles'     <- newRef $ ellipsAngles
 
   setInterval 150 $ void $ do
     clearRect ctx {x: 0.0, y: 0.0, w: width, h: height}
@@ -121,7 +122,8 @@ main = void $ do
 
     angles'' <- readRef angles'
 
+    let xs = zip angles'' ellipsAngles
+
     drawCircle ctx
     foreachE ellipses \ellipse -> void $ drawEllipse ellipse ctx
-    foreachE angles'' \angle   -> do
-      foreachE ellipsAngles  \eAng -> void $ drawPoint (pointPos angle eAng) ctx
+    foreachE xs \angleTup -> void $ drawPoint (pointPos (fst angleTup) (snd angleTup)) ctx
