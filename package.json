@@ -4,7 +4,8 @@
   "description": "Kewl animation.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "export PATH=node_modules/.bin:$PATH && node_modules/.bin/pulp build && webpack",
+    "start": "npm run build && webpack-dev-server --content-base public/ --hot --inline"
   },
   "author": "Emil van Veen <emilveen@gmail.com>",
   "license": "ISC",
