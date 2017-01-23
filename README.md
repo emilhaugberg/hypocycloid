@@ -1,4 +1,4 @@
-# Circle Animation
+# Hypocycloid
 
 ![](https://media.giphy.com/media/xNJMMGFzW1C80/giphy.gif)
 
