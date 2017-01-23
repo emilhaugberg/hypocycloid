@@ -22,12 +22,12 @@ derive newtype instance semiringAngle :: Semiring Angle
 
 type X = Number
 type Y = Number
-type Position = Tuple X Y
+type Position = { x :: Number, y :: Number }
 type Ellipse  =
   { x          :: Number
   , y          :: Number
-  , rx    :: Number
-  , ry    :: Number
+  , rx         :: Number
+  , ry         :: Number
   , rotation   :: Angle
   , startAngle :: Angle
   , endAngle   :: Angle
@@ -45,7 +45,6 @@ centerY = height / 2.0
 nums = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
 
 startingAngles = map (\_ -> Angle $ Math.pi / 10.0) nums
--- startingAngles = [Math.pi, Mat.pi /]
 
 space :: Angle
 space = Angle (Math.pi / 2.0 / 4.0)
@@ -82,7 +81,7 @@ drawCircle ctx = do
 
 drawPoint :: forall e. Position -> Context2D -> Eff (canvas :: CANVAS | e) Context2D
 drawPoint pos ctx = do
-  let a = { x: fst pos, y: snd pos, r: 10.0, start: 0.0, end: Math.pi * 2.0 }
+  let a = { x: pos.x, y: pos.y, r: 10.0, start: 0.0, end: Math.pi * 2.0 }
   beginPath ctx
   arc ctx a
   setFillStyle "white" ctx
@@ -95,20 +94,22 @@ move :: Angle -> Angle
 move (Angle ang) = Angle (ang + (Math.pi / 10.0))
 
 rotate :: Angle -> Position -> Position
-rotate ang pos = Tuple nx ny
+rotate ang pos = { x: nx, y: ny }
   where
-    nx   = (cos * (fst pos - centerX)) + (sin * (snd pos - centerY)) + centerX
-    ny   = (cos * (snd pos - centerY)) - (sin * (fst pos - centerX)) + centerY
+    nx   = (cos * (pos.x - centerX)) + (sin * (pos.y - centerY)) + centerX
+    ny   = (cos * (pos.y - centerY)) - (sin * (pos.x - centerX)) + centerY
     cos  = Math.cos ang'
     sin  = Math.sin ang'
     ang' = fromAngle ang
 
 pointPos :: Angle -> Angle -> Position
-pointPos ang angleR = rotate angleR $ Tuple (x ang) (y ang)
+pointPos ang angleR = rotate angleR { x: x, y: y }
   where
-    y ang     = centerX + (radius * (Math.sin $ ang'))
-    x ang     = centerY + (0.0    * (Math.cos $ ang'))
-    ang' = fromAngle ang
+    x      = x' ang
+    y      = y' ang
+    y' ang = centerX + (radius * (Math.sin $ ang'))
+    x' ang = centerY + (0.0    * (Math.cos $ ang'))
+    ang'   = fromAngle ang
 
 main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER | e) Unit
 main = void $ do
