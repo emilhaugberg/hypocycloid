@@ -91,7 +91,7 @@ fromAngle :: Angle -> Number
 fromAngle (Angle x) = x
 
 move :: Angle -> Angle
-move (Angle ang) = Angle (ang + (Math.pi / 10.0))
+move (Angle ang) = Angle (ang + (Math.pi / 20.0))
 
 rotate :: Angle -> Position -> Position
 rotate ang pos = { x: nx, y: ny }
