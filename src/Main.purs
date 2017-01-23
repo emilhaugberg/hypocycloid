@@ -1,16 +1,14 @@
 module Main where
 
-import Prelude (Unit, bind, map, void, show, ($), (*), (/), (+), (-), (<<<))
+import Prelude (Unit, bind, map, void, ($), (*), (+), (-), (/), (<<<))
 import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef)
 import Control.Monad.Eff.Timer (TIMER, setInterval)
-import Control.Monad.Eff.Console (log)
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (fst, snd)
 import Data.Semiring (class Semiring)
-import Data.Show (class Show)
 import Data.Array (zip)
-import Graphics.Canvas (CANVAS, Context2D, arc, beginPath, clearRect, fill, getCanvasElementById, getContext2D, lineTo, moveTo, setFillStyle, stroke)
+import Graphics.Canvas (CANVAS, Context2D, arc, beginPath, clearRect, fill, getCanvasElementById, getContext2D, setFillStyle, stroke)
 import Math as Math
 
 -- Experimental: Doesn't work in IE.
@@ -37,14 +35,11 @@ width  = 600.0
 height = 600.0
 
 radius = 250.0
-dotRadius = 10.0
 
 centerX = width  / 2.0
 centerY = height / 2.0
 
 nums = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
-
-startingAngles = map (\_ -> Angle $ Math.pi / 10.0) nums
 
 space :: Angle
 space = Angle (Math.pi / 2.0 / 4.0)
@@ -115,16 +110,16 @@ main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER
 main = void $ do
   Just canvas <- getCanvasElementById "canvas"
   ctx         <- getContext2D canvas
-  angles'     <- newRef $ ellipsAngles
+  eAngles     <- newRef $ ellipsAngles
 
   setInterval 150 $ void $ do
     clearRect ctx {x: 0.0, y: 0.0, w: width, h: height}
-    modifyRef angles' (map move)
+    modifyRef eAngles (map move)
 
-    angles'' <- readRef angles'
+    angles' <- readRef eAngles
 
-    let xs = zip angles'' ellipsAngles
+    let as = zip angles' ellipsAngles
 
     drawCircle ctx
-    foreachE ellipses \ellipse -> void $ drawEllipse ellipse ctx
-    foreachE xs \angleTup -> void $ drawPoint (pointPos (fst angleTup) (snd angleTup)) ctx
+    foreachE ellipses \ellipse  -> void $ drawEllipse ellipse ctx
+    foreachE as       \angleTup -> void $ drawPoint (pointPos (fst angleTup) (snd angleTup)) ctx
