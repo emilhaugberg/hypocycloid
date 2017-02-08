@@ -5,6 +5,7 @@ import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef)
 import Control.Monad.Eff.Timer (TIMER, setInterval)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype, unwrap)
 import Data.Tuple (fst, snd)
 import Data.Semiring (class Semiring)
 import Data.Array (zip)
@@ -17,6 +18,7 @@ foreign import ellipse :: forall e. Ellipse -> Context2D -> Eff (canvas :: CANVA
 
 newtype Angle   = Angle Number
 derive newtype instance semiringAngle :: Semiring Angle
+derive instance newtypeAngle :: Newtype Angle _
 
 type X = Number
 type Y = Number
@@ -82,9 +84,6 @@ drawPoint pos ctx = do
   setFillStyle "white" ctx
   fill ctx
 
-fromAngle :: Angle -> Number
-fromAngle (Angle x) = x
-
 move :: Angle -> Angle
 move (Angle ang) = Angle (ang + (Math.pi / 20.0))
 
@@ -95,7 +94,7 @@ rotate ang pos = { x: nx, y: ny }
     ny   = (cos * (pos.y - centerY)) - (sin * (pos.x - centerX)) + centerY
     cos  = Math.cos ang'
     sin  = Math.sin ang'
-    ang' = fromAngle ang
+    ang' = unwrap ang
 
 pointPos :: Angle -> Angle -> Position
 pointPos ang angleR = rotate angleR { x: x, y: y }
@@ -104,7 +103,7 @@ pointPos ang angleR = rotate angleR { x: x, y: y }
     y      = y' ang
     y' ang = centerX + (radius * (Math.sin $ ang'))
     x' ang = centerY + (0.0    * (Math.cos $ ang'))
-    ang'   = fromAngle ang
+    ang'   = unwrap ang
 
 main :: forall e. (Partial) => Eff (ref :: REF, canvas :: CANVAS, timer :: TIMER | e) Unit
 main = void $ do
