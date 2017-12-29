@@ -111,7 +111,7 @@ main = void $ do
   ctx         <- getContext2D canvas
   eAngles     <- newRef $ ellipsAngles
 
-  setInterval 150 $ void $ do
+  setInterval 100 $ void $ do
     clearRect ctx {x: 0.0, y: 0.0, w: width, h: height}
     modifyRef eAngles (map move)
 
